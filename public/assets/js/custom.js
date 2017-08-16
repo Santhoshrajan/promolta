@@ -17,18 +17,21 @@ $(document).ready(function() {
 	var mail_label = '';
 	var mail_attach = '';
 
+	var msg_id 	= 0;
+	var current_folder = '';
+
 	// Start of Email Check
 	window.onload = function () {
 
-		var current_folder 		= 	$('#current_folder').val();
-		var msg_id 				= 	Number($('#msg_id').val());
-		var login_data 			= 	{ 'folder_key' : current_folder, 'msg_id' : msg_id };
+		current_folder 			= 	$('#current_folder').val();
+		msg_id 					= 	Number($('#msg_id').val());
+		var post_data 			= 	{ 'folder_key' : current_folder, 'msg_id' : msg_id };
 
 		if(msg_id){
 			$.ajax({
 			type: 'POST',
 			url: APP_URL+'/api/v1/mail/check',
-			data: login_data,
+			data: post_data,
 			beforeSend: function (xhr) {
 				xhr.setRequestHeader('Authorization', auth_token);
 			},
@@ -39,7 +42,7 @@ $(document).ready(function() {
 					var xhr_data = jQuery.parseJSON(data);
 
 						if(xhr_data.status<0){
-							window.location='login';
+							window.location=APP_URL+'/'+'login';
 						}
 						else{
 							xhr_data.data.placeHolders.forEach(function(p_holder) {
@@ -80,7 +83,7 @@ $(document).ready(function() {
 			$.ajax({
 			type: 'POST',
 			url: APP_URL+'/api/v1/mail/check',
-			data: login_data,
+			data: post_data,
 			beforeSend: function (xhr) {
 				xhr.setRequestHeader('Authorization', auth_token);
 			},
@@ -91,7 +94,7 @@ $(document).ready(function() {
 					var xhr_data = jQuery.parseJSON(data);
 
 						if(xhr_data.status<0){
-							window.location='login';
+							window.location=APP_URL+'/'+'login';
 						}
 						else{
 							xhr_data.data.placeHolders.forEach(function(p_holder) {
@@ -139,7 +142,7 @@ $(document).ready(function() {
 		$.ajax({
 			type: 'POST',
 			url: APP_URL+'/api/v1/contact/fetch',
-			data: login_data,
+			data: post_data,
 			beforeSend: function (xhr) {
 				xhr.setRequestHeader('Authorization', auth_token);
 			},
@@ -150,7 +153,7 @@ $(document).ready(function() {
 					var xhr_data = jQuery.parseJSON(data);
 
 						if(xhr_data.status<0){
-							window.location='login';
+							window.location=APP_URL+'/'+'login';
 						}
 						else{
 							contact_list += " <li> <h4>Frequently Contacted</h4> </li> ";
@@ -158,7 +161,7 @@ $(document).ready(function() {
 							xhr_data.data.forEach(function(buddy) {
 								var randstatus = statusArray[Math.floor(Math.random() * statusArray.length)];
 								contact_list += " <li> <a href='#'> <i class=' fa fa-circle " + randstatus + "'></i>" + buddy.full_name + "<p>" + buddy.online_status + "</p></a>  </li> ";
-							}); console.log(contact_list);
+							});
 							$('#buddy-list').html(contact_list);
 						}
 
@@ -233,6 +236,51 @@ $(document).ready(function() {
 		localStorage.removeItem('auth_token');
 		localStorage.removeItem('full_name');
 		localStorage.removeItem('uname');
-		window.location='login';
+		window.location=APP_URL+'/'+'login';
 	});
+
+	$(document).on('click', '.email-action', function(){
+
+		var action 	= 	$(this).attr('data-action');
+		var found   = $.inArray( action, [ 'unread', 'spam', 'trash' ] );
+
+		var post_data = { 'action' : action, 'msg_id' : msg_id };
+
+		if(found>-1){
+			if(msg_id){
+				$.ajax({
+				type: 'POST',
+				url: APP_URL+'/api/v1/mail/change',
+				data: post_data,
+				beforeSend: function (xhr) {
+					xhr.setRequestHeader('Authorization', auth_token);
+				},
+				dataType: 'html',
+			    timeout: 10000,
+			    async: false,
+					success: function (data) {
+						var xhr_data = jQuery.parseJSON(data);
+
+							if(xhr_data.status<0){
+								window.location=APP_URL+'/'+'login';
+							}
+							else{
+								if(xhr_data.status=='success'){
+									window.location=APP_URL+'/'+current_folder;
+								}
+							}
+
+						},
+				    error: function(jqXHR, textStatus, errorThrown) {
+				        if(textStatus==="timeout") {
+				        	$('.response-msg').html('Sorry! Network timeout').css({'color':'red'});
+				        } else {
+
+				        }
+				   	}
+				});
+			}
+		}
+	});
+
 });

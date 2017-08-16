@@ -31,37 +31,6 @@ use Auth;
 
 class UsersControllers extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
-    {
-        DB::enableQueryLog();
-
-        $users = DB::table('users')->first();
-        // $users = DB::table('users')->where("id" , 1)->get();
-        // $newToken = JWTAuth::parseToken()->refresh();
-        // DB::enableQueryLog();
-        // print_r(DB::getQueryLog());
-        print_r(DB::getQueryLog());
-
-        // $users = User::find(1);
-
-        return response()->json($users);
-    }
-
-    public function store(Request $request)
-    {
-        $inputs = $request->input();
-
-        $param = $inputs["param"];
-
-        $users = User::find($param);
-
-        return response()->json($users);
-    }
 
     public function checkUser(Request $request){ // Check if New user or Existing User - OK
 

@@ -36,6 +36,7 @@ Route::group(['middleware' => ['validate_token']], function () {
 
 			Route::post('send','EmailController@sendMail');
 			Route::post('check','EmailController@getAllMails');
+			Route::post('change','EmailController@updateMail');
 
 		});
 

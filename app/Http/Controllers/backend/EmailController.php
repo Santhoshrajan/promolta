@@ -18,11 +18,7 @@ use MyFuncs;
 
 class EmailController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+
     public function index()
     {
         //
@@ -148,6 +144,12 @@ class EmailController extends Controller
 
         try {
 
+            if($msg_id>0){
+                DB::table('user_msg_map')
+                    ->where([ 'msg_id' => $msg_id, 'folder_id' => 1, 'user_id' => $user_id ])
+                    ->update(['is_unread' => 0]);
+            }
+
             $output->data->placeHolders = DB::table('folders AS f')
                                                 ->leftJoin('user_msg_map AS umm', function($join) use ($user_id) {
                                                     $join->on('f.id','=','umm.folder_id')
@@ -177,6 +179,7 @@ class EmailController extends Controller
                     ->where($cond)
                     ->whereBetween('umm.folder_id', [1,5])
                     ->select($select)
+                    ->orderBy('m.id', 'desc')
                     ->get();
 
             foreach ($query as $r) {
@@ -199,48 +202,57 @@ class EmailController extends Controller
         }
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
+    public function updateMail(Request $request)
     {
-        //
+        $user_id       =   $request->input('user_id', 0);
+        $msg_id        =   $request->input('msg_id', 0);
+        $action        =   $request->input('action');
+
+        $output              =   new stdClass();
+        $output->status      =   'success';
+        $output->message     =   'Welcome to XYZ email';
+
+        $v = Validator::make($request->all(), [
+            'msg_id' => 'required|integer',
+            'action' => 'in:unread,spam,trash'
+        ]);
+
+        if ($v->fails()){
+            $output->message    =   'Oops! Please check the input!';
+            $output->errors     =   $v->errors();
+            return response()->json($output);
+        }
+
+        if($action=='unread' || $action=='spam'){
+           $cond = [ 'msg_id' => $msg_id, 'folder_id' => 1, 'user_id' => $user_id ];
+        }
+        else{
+           $cond = [ 'msg_id' => $msg_id, 'user_id' => $user_id ];
+        }
+
+        if($action=='trash'){
+           $update = [ 'folder_id' => 5 ];
+        }
+        else if($action=='spam'){
+           $update = [ 'folder_id' => 4 ];
+        }
+        else{
+           $update = [ 'is_unread' => 1 ];
+        }
+
+        try{
+            DB::table('user_msg_map')->where($cond)->update($update);
+
+            return response()->json($output);
+
+        } catch (\Exception $e) {
+
+            return response()->json(['status' => 'fail', 'error' => [
+                    'type' => 'database_exception',
+                    'details' => $e->getMessage()
+                ]
+            ]);
+        }
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
-    }
 }

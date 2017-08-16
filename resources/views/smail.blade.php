@@ -136,11 +136,11 @@
                        <i class="fa fa-angle-down "></i>
                    </a>
                    <ul class="dropdown-menu">
-                       <li><a href="#"><i class="fa fa-pencil"></i> Mark as UnRead</a></li>
+                       <li class="email-action" data-action="unread"><a href="#"><i class="fa fa-pencil"></i> Mark as UnRead</a></li>
                        <li class="divider"></li>
-                       <li><a href="#"><i class="fa fa-ban"></i> Spam</a></li>
+                       <li class="email-action" data-action="spam"><a href="#"><i class="fa fa-ban"></i> Spam</a></li>
                        <li class="divider"></li>
-                       <li><a href="#"><i class="fa fa-trash-o"></i> Delete</a></li>
+                       <li class="email-action" data-action="trash"><a href="#"><i class="fa fa-trash-o"></i> Delete</a></li>
                    </ul>
                </div>
 
