@@ -125,9 +125,9 @@
                        <i class="fa fa-angle-down "></i>
                    </a>
                    <ul class="dropdown-menu">
-                       <li><a href="#"><i class="fa fa-pencil"></i> Reply</a></li>
+                       <li class="email-action" data-action="reply"><a href="#myModal" data-toggle="modal"><i class="fa fa-pencil"></i> Reply</a></li>
                        <li class="divider"></li>
-                       <li><a href="#"><i class="fa fa-ban"></i> Forward</a></li>
+                       <li class="email-action" data-action="forward"><a href="#myModal" data-toggle="modal"><i class="fa fa-ban"></i> Forward</a></li>
                    </ul>
                </div>
                <div class="btn-group">

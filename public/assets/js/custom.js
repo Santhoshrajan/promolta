@@ -61,7 +61,7 @@ $(document).ready(function() {
 
 							xhr_data.data.mail[use_this_key].forEach(function(s_mail) {
 
-								smail += " <div class='sub'><h3> " + s_mail.subject + " </h3></div> <div class='details'><span class='detail-name'> " + s_mail.full_name + "</span><span class='detail-email'> " + s_mail.uname + "  </span> <span class='detail-time'> " + s_mail.mail_date + " </span> </div> <div class='email-body'>  " + s_mail.body + "  </div> ";
+								smail += " <div class='sub'><h3 class='detail-subject' data-detail-subject='" +s_mail.subject+ "'> " + s_mail.subject + " </h3></div> <div class='details'><span class='detail-name' data-detail-name='"+ s_mail.full_name +"'> " + s_mail.full_name + "</span><span class='detail-email' data-detail-email='" + s_mail.uname + "'> " + s_mail.uname + "  </span> <span class='detail-time' data-detail-time='"+ s_mail.mail_date +"'> " + s_mail.mail_date + " </span> </div> <div class='email-body' data-email-body='"+ s_mail.body +"'>  " + s_mail.body + "  </div> ";
 							});
 
 							$('#user-info').html(" <h5><a href='#'>" + full_name + "</a></h5><span>" + uname + "</span> ");
@@ -204,10 +204,10 @@ $(document).ready(function() {
 				success: function (data) {
 					var xhr_data = jQuery.parseJSON(data);
 						if(action=='draft'){
-							window.location='drafts';
+							window.location=APP_URL+'/'+'drafts';
 						}
 						else{
-							window.location='sent';
+							window.location=APP_URL+'/'+'sent';
 						}
 					},
 			    error: function(jqXHR, textStatus, errorThrown) {
@@ -242,7 +242,9 @@ $(document).ready(function() {
 	$(document).on('click', '.email-action', function(){
 
 		var action 	= 	$(this).attr('data-action');
-		var found   = $.inArray( action, [ 'unread', 'spam', 'trash' ] );
+		var found   =   $.inArray( action, [ 'unread', 'spam', 'trash' ] );
+
+		var reply_forward   =   $.inArray( action, [ 'reply', 'forward' ] );
 
 		var post_data = { 'action' : action, 'msg_id' : msg_id };
 
@@ -280,6 +282,26 @@ $(document).ready(function() {
 				   	}
 				});
 			}
+		}
+
+		if(reply_forward>-1){
+
+			var detailsubject 	= $('.detail-subject').data('detail-subject');
+			var detailname 		= $('.detail-name').data('detail-name');
+			var detailemail 	= $('.detail-email').data('detail-email');
+			var detailtime 		= $('.detail-time').data('detail-time');
+			var emailbody 		= $('.email-body').data('email-body');
+
+			if(action=='reply'){
+				$('#to').val(detailemail);
+				$('#subject').val('Re: '+detailsubject);
+				$('#body').val('On ' + detailtime + ', ' + detailname + ' <' + detailemail + '> wrote: \r\n' + emailbody);
+			}
+			else{
+				$('#subject').val('Fwd: '+detailsubject);
+				$('#body').val('---------- Forwarded message ---------- \r\n From: ' + detailname + ' <' + detailemail + '> \r\n'  +' Date:  '+ detailtime + '\r\n' + 'Subject: Re: ' + detailsubject + '\r\n' + emailbody);
+			}
+
 		}
 	});
 
